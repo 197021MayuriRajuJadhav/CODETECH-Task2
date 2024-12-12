@@ -1,0 +1,207 @@
+import java.util.*;
+
+class Account {
+    private String accountNumber;
+    private String accountHolderName;
+    private double balance;
+    private List<String> transactionHistory;
+
+    public Account(String accountNumber, String accountHolderName) {
+        this.accountNumber = accountNumber;
+        this.accountHolderName = accountHolderName;
+        this.balance = 0.0;
+        this.transactionHistory = new ArrayList<>();
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public String getAccountHolderName() {
+        return accountHolderName;
+    }
+
+    public void setAccountHolderName(String accountHolderName) {
+        this.accountHolderName = accountHolderName;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public List<String> getTransactionHistory() {
+        return transactionHistory;
+    }
+
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            System.out.println("Invalid deposit amount.");
+            return;
+        }
+        balance += amount;
+        transactionHistory.add("Deposited: $" + amount);
+    }
+
+    public void withdraw(double amount) {
+        if (amount <= 0 || amount > balance) {
+            System.out.println("Invalid withdrawal amount.");
+            return;
+        }
+        balance -= amount;
+        transactionHistory.add("Withdrew: $" + amount);
+    }
+
+    public void transfer(Account recipient, double amount) {
+        if (amount <= 0 || amount > balance) {
+            System.out.println("Invalid transfer amount.");
+            return;
+        }
+        this.withdraw(amount);
+        recipient.deposit(amount);
+        transactionHistory.add("Transferred: $" + amount + " to " + recipient.getAccountHolderName());
+        recipient.getTransactionHistory().add("Received: $" + amount + " from " + this.getAccountHolderName());
+    }
+}
+
+public class OnlineBankingSystem {
+    private Map<String, Account> accounts;
+
+    public OnlineBankingSystem() {
+        accounts = new HashMap<>();
+    }
+
+    public void createAccount(String accountNumber, String accountHolderName) {
+        if (accounts.containsKey(accountNumber)) {
+            System.out.println("Account number already exists.");
+            return;
+        }
+        accounts.put(accountNumber, new Account(accountNumber, accountHolderName));
+        System.out.println("Account created successfully.");
+    }
+
+    public Account getAccount(String accountNumber) {
+        return accounts.get(accountNumber);
+    }
+
+    public void displayAccountDetails(String accountNumber) {
+        Account account = accounts.get(accountNumber);
+        if (account == null) {
+            System.out.println("Account not found.");
+            return;
+        }
+        System.out.println("Account Number: " + account.getAccountNumber());
+        System.out.println("Account Holder: " + account.getAccountHolderName());
+        System.out.println("Balance: $" + account.getBalance());
+    }
+
+    public void displayTransactionHistory(String accountNumber) {
+        Account account = accounts.get(accountNumber);
+        if (account == null) {
+            System.out.println("Account not found.");
+            return;
+        }
+        System.out.println("Transaction History:");
+        for (String transaction : account.getTransactionHistory()) {
+            System.out.println(transaction);
+        }
+    }
+
+    public static void main(String[] args) {
+        OnlineBankingSystem bankingSystem = new OnlineBankingSystem();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nOnline Banking System");
+            System.out.println("1. Create Account");
+            System.out.println("2. Deposit");
+            System.out.println("3. Withdraw");
+            System.out.println("4. Transfer");
+            System.out.println("5. View Account Details");
+            System.out.println("6. View Transaction History");
+            System.out.println("7. Update Account Holder Name");
+            System.out.println("8. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter account number: ");
+                    String accountNumber = scanner.nextLine();
+                    System.out.print("Enter account holder name: ");
+                    String accountHolderName = scanner.nextLine();
+                    bankingSystem.createAccount(accountNumber, accountHolderName);
+                    break;
+                case 2:
+                    System.out.print("Enter account number: ");
+                    accountNumber = scanner.nextLine();
+                    System.out.print("Enter deposit amount: ");
+                    double depositAmount = scanner.nextDouble();
+                    Account account = bankingSystem.getAccount(accountNumber);
+                    if (account != null) {
+                        account.deposit(depositAmount);
+                    } else {
+                        System.out.println("Account not found.");
+                    }
+                    break;
+                case 3:
+                    System.out.print("Enter account number: ");
+                    accountNumber = scanner.nextLine();
+                    System.out.print("Enter withdrawal amount: ");
+                    double withdrawalAmount = scanner.nextDouble();
+                    account = bankingSystem.getAccount(accountNumber);
+                    if (account != null) {
+                        account.withdraw(withdrawalAmount);
+                    } else {
+                        System.out.println("Account not found.");
+                    }
+                    break;
+                case 4:
+                    System.out.print("Enter sender account number: ");
+                    String senderAccountNumber = scanner.nextLine();
+                    System.out.print("Enter recipient account number: ");
+                    String recipientAccountNumber = scanner.nextLine();
+                    System.out.print("Enter transfer amount: ");
+                    double transferAmount = scanner.nextDouble();
+                    Account senderAccount = bankingSystem.getAccount(senderAccountNumber);
+                    Account recipientAccount = bankingSystem.getAccount(recipientAccountNumber);
+                    if (senderAccount != null && recipientAccount != null) {
+                        senderAccount.transfer(recipientAccount, transferAmount);
+                    } else {
+                        System.out.println("One or both accounts not found.");
+                    }
+                    break;
+                case 5:
+                    System.out.print("Enter account number: ");
+                    accountNumber = scanner.nextLine();
+                    bankingSystem.displayAccountDetails(accountNumber);
+                    break;
+                case 6:
+                    System.out.print("Enter account number: ");
+                    accountNumber = scanner.nextLine();
+                    bankingSystem.displayTransactionHistory(accountNumber);
+                    break;
+                case 7:
+                    System.out.print("Enter account number: ");
+                    accountNumber = scanner.nextLine();
+                    System.out.print("Enter new account holder name: ");
+                    accountHolderName = scanner.nextLine();
+                    account = bankingSystem.getAccount(accountNumber);
+                    if (account != null) {
+                        account.setAccountHolderName(accountHolderName);
+                        System.out.println("Account holder name updated successfully.");
+                    } else {
+                        System.out.println("Account not found.");
+                    }
+                    break;
+                case 8:
+                    System.out.println("Exiting system. Goodbye!");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
